@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\Lenovo\Documents\progra\pc1
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Users/Lenovo/Documents/progra/pc1/Views/Boleta/Mostrar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQm9sZXRhXE1vc3RyYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Lenovo/Documents/progra/pc1/Views/Casa/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FzYVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

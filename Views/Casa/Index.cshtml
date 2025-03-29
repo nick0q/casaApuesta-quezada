@@ -14,12 +14,14 @@
     .btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
     .btn-success { color: #fff; background-color: #28a745; border-color: #28a745; margin-left: 10px; }
     .text-danger { color: #dc3545 !important; }
-     .text-success { color: #198754 !important; } /* Para mensaje de éxito */
+    .text-success { color: #198754 !important; }
     .result-display { margin-top: 15px; font-weight: bold; background-color: #e9ecef; padding: 10px; border-radius: 5px; }
     .validation-summary-errors ul { list-style-type: none; padding-left: 0; }
     .alert { padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: .25rem; }
     .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
-    .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; } /* Para mensaje de éxito */
+    .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
+    .field-validation-error { display: block; } 
+
 </style>
 
 <h1>@ViewData["Title"]</h1>
@@ -27,42 +29,44 @@
 <hr />
 
 
-@if (!ViewData.ModelState.IsValid)
+@if (ViewData.ModelState.ErrorCount > 0 && ViewData.ModelState.Any(kvp => string.IsNullOrEmpty(kvp.Key) || kvp.Key.StartsWith("Usuario.")))
 {
     <div class="alert alert-danger validation-summary-errors" role="alert">
          <span>Por favor corrija los siguientes errores:</span>
             <ul>
             @foreach (var key in ViewData.ModelState.Keys)
             {
-                foreach (var error in ViewData.ModelState[key]?.Errors ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>())
-                {
-                    if (!string.IsNullOrWhiteSpace(error.ErrorMessage)) 
+                 if(string.IsNullOrEmpty(key) || key.StartsWith("Usuario.")) {
+                    foreach (var error in ViewData.ModelState[key]?.Errors ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>())
                     {
-                        <li>@error.ErrorMessage</li>
+                        if (!string.IsNullOrWhiteSpace(error.ErrorMessage))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
                     }
-                }
+                 }
             }
             </ul>
     </div>
 }
 
-
- @if (ViewBag.SuccessMessage != null)
+ 
+ @if (TempData["ErrorMessage"] != null)
  {
-     <div class="alert alert-success" role="alert">
-         @ViewBag.SuccessMessage
-     </div>
+     <div class="alert alert-warning">@TempData["ErrorMessage"]</div>
  }
+ 
 
 
 <form asp-controller="Casa" asp-action="Index" method="post">
     @Html.AntiForgeryToken()
 
     <div class="form-container">
- 
+
+       
         <div class="form-section">
             <h3>1. Tus Datos</h3>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="Usuario.Nombre" class="control-label"></label>
                 <input asp-for="Usuario.Nombre" class="form-control" />
                 <span asp-validation-for="Usuario.Nombre" class="text-danger"></span>
@@ -72,99 +76,106 @@
                 <input asp-for="Usuario.Correo" class="form-control" type="email" />
                 <span asp-validation-for="Usuario.Correo" class="text-danger"></span>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="Usuario.Dni" class="control-label">DNI</label>
                 <input asp-for="Usuario.Dni" class="form-control" />
                 <span asp-validation-for="Usuario.Dni" class="text-danger"></span>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="Usuario.Telefono" class="control-label">Teléfono</label>
                 <input asp-for="Usuario.Telefono" class="form-control" type="tel" />
                 <span asp-validation-for="Usuario.Telefono" class="text-danger"></span>
             </div>
         </div>
 
-    
+
+      
         <div class="form-section">
             <h3>2. Operación de Cambio</h3>
             <div class="form-group">
                 <label asp-for="Operacion.MonedaOrigen" class="control-label">Envías</label>
                 <select asp-for="Operacion.MonedaOrigen" asp-items="@Model.Operacion.MonedasDisponibles" class="form-control">
+                     
                 </select>
                 <span asp-validation-for="Operacion.MonedaOrigen" class="text-danger"></span>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="Operacion.MontoEnviar" class="control-label">Monto a Enviar</label>
                 <input asp-for="Operacion.MontoEnviar" class="form-control" type="number" step="0.01" />
                 <span asp-validation-for="Operacion.MontoEnviar" class="text-danger"></span>
             </div>
-             <div class="form-group">
+            <div class="form-group">
                 <label asp-for="Operacion.MonedaDestino" class="control-label">Recibes</label>
-                 <select asp-for="Operacion.MonedaDestino" asp-items="@Model.Operacion.MonedasDisponibles" class="form-control">
+                <select asp-for="Operacion.MonedaDestino" asp-items="@Model.Operacion.MonedasDisponibles" class="form-control">
+                    
                 </select>
+       
                 <span asp-validation-for="Operacion.MonedaDestino" class="text-danger"></span>
+                 @if (ViewData.ModelState.TryGetValue("Operacion.MonedaDestino", out var errorStateField) && errorStateField.Errors.Any())
+                 {
+                     <span class="text-danger field-validation-error">@errorStateField.Errors.First().ErrorMessage</span>
+                 }
             </div>
 
-           
-             @if (Model.Operacion.MontoRecibir.HasValue && Model.Operacion.MontoRecibir > 0 && !ViewData.ModelState.ContainsKey("Operacion.MonedaDestino"))
-             {
-                 <div class="result-display">
-                     Recibirás aprox.: @Model.Operacion.MontoRecibir.Value.ToString("N2") @Model.Operacion.MonedaDestino
-                     <br/>
-                     <small>Tipo de cambio aplicado: @Model.Operacion.TipoCambioAplicado?.ToString("N6")</small>
-                  </div>
-             }
 
-             @if (ViewData.ModelState.TryGetValue("Operacion.MonedaDestino", out var errorState) && errorState.Errors.Any())
-             {
-                 <div class="text-danger mt-2">
-                     @errorState.Errors.First().ErrorMessage
-                 </div>
-             }
+            @if (Model.Operacion.MontoRecibir.HasValue && Model.Operacion.MontoRecibir > 0 &&
+                 !(ViewData.ModelState.TryGetValue("Operacion.MonedaDestino", out var errorStateForResult) && errorStateForResult.Errors.Any()))
+            {
+                <div class="result-display">
+                    Al enviar <strong>@Model.Operacion.MontoEnviar?.ToString("N2") @Model.Operacion.MonedaOrigen</strong>,
+                    recibirás aprox.: <strong>@Model.Operacion.MontoRecibir.Value.ToString("N2") @Model.Operacion.MonedaDestino</strong>
+                    <br />
+                    <small>
+                        Tipo de cambio aplicado:
+                        1 @Model.Operacion.MonedaOrigen = @Model.Operacion.TipoCambioAplicado?.ToString("N6") @Model.Operacion.MonedaDestino
+                    </small>
+                </div>
+
+                <input type="hidden" asp-for="Operacion.MontoRecibir" />
+                <input type="hidden" asp-for="Operacion.TipoCambioAplicado" />
+            }
 
             <div class="form-group mt-4 text-end">
                 <button type="submit" name="actionButton" value="calcular" class="btn btn-primary">Hacer Cambio</button>
                 <button type="submit" name="actionButton" value="completar" class="btn btn-success">Completar Operación</button>
-             </div>
+            </div>
         </div>
     </div>
 </form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
- 
-        (function() {
+      
+        (function () {
             const origenSelect = document.getElementById('Operacion_MonedaOrigen');
             const destinoSelect = document.getElementById('Operacion_MonedaDestino');
 
-             if (!origenSelect || !destinoSelect) return;
+            if (!origenSelect || !destinoSelect) return;
 
             function syncMonedas() {
                 const origenVal = origenSelect.value;
                 const destinoVal = destinoSelect.value;
 
-            
                 Array.from(destinoSelect.options).forEach(opt => {
                     opt.disabled = (opt.value === origenVal && opt.value !== "");
                 });
-                
+
                 Array.from(origenSelect.options).forEach(opt => {
-                     opt.disabled = (opt.value === destinoVal && opt.value !== "");
+                    opt.disabled = (opt.value === destinoVal && opt.value !== "");
                 });
 
-  
-                 if (destinoSelect.options[destinoSelect.selectedIndex]?.disabled) {
+                if (destinoSelect.options[destinoSelect.selectedIndex]?.disabled) {
                     destinoSelect.value = "";
-                 }
-                 if (origenSelect.options[origenSelect.selectedIndex]?.disabled) {
-                     origenSelect.value = "";
+                }
+                if (origenSelect.options[origenSelect.selectedIndex]?.disabled) {
+                    origenSelect.value = "";
                 }
             }
 
-             origenSelect.addEventListener('change', syncMonedas);
-             destinoSelect.addEventListener('change', syncMonedas);
-             syncMonedas(); 
+            origenSelect.addEventListener('change', syncMonedas);
+            destinoSelect.addEventListener('change', syncMonedas);
+            syncMonedas(); 
         })();
     </script>
 }

@@ -1,0 +1,66 @@
+@model pc1.Models.Boleta
+@{
+    ViewData["Title"] = "Boleta de Operación de Cambio";
+    Layout = "_Layout"; 
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+@if (Model != null)
+{
+    <div class="boleta-container" style="border: 1px solid #007bff; padding: 25px; margin: 20px auto; max-width: 650px; font-family: Arial, sans-serif; border-radius: 10px; background-color: #f8f9fa;">
+        <div class="boleta-header" style="text-align: center; margin-bottom: 25px; border-bottom: 2px dashed #007bff; padding-bottom: 15px;">
+            <h2 style="color: #0056b3; margin-bottom: 10px;">Comprobante de Operación</h2>
+            <p><strong>Número de Boleta:</strong> @Model.NumeroBoleta</p>
+            <p><strong>Fecha y Hora:</strong> @Model.FechaOperacion.ToString("dd/MM/yyyy HH:mm:ss")</p>
+        </div>
+
+        @if (Model.DatosUsuario != null)
+        {
+            <div class="boleta-section" style="margin-bottom: 20px;">
+                <h4 style="color: #0056b3; border-bottom: 1px solid #dee2e6; padding-bottom: 5px; margin-bottom: 10px;">Datos del Cliente</h4>
+                <div class="boleta-details" style="line-height: 1.6;">
+                    <p><strong>Nombre:</strong> @Model.DatosUsuario.Nombre</p>
+                    <p><strong>Correo:</strong> @Model.DatosUsuario.Correo</p>
+                    <p><strong>DNI:</strong> @Model.DatosUsuario.Dni</p>
+                    <p><strong>Teléfono:</strong> @Model.DatosUsuario.Telefono</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.DatosOperacion != null)
+        {
+            <div class="boleta-section" style="margin-bottom: 20px;">
+                <h4 style="color: #0056b3; border-bottom: 1px solid #dee2e6; padding-bottom: 5px; margin-bottom: 10px;">Detalle de la Operación</h4>
+                <div class="boleta-details" style="line-height: 1.6;">
+                    <p><strong>Moneda Enviada:</strong> @Model.DatosOperacion.MonedaOrigen</p>
+                    <p><strong>Monto Enviado:</strong> @Model.DatosOperacion.MontoEnviar?.ToString("N2")</p>
+                    <hr style="border-top: 1px dashed #ccc; margin: 10px 0;">
+                    <p><strong>Moneda Recibida:</strong> @Model.DatosOperacion.MonedaDestino</p>
+                    <p><strong>Monto Recibido (aprox.):</strong> @Model.DatosOperacion.MontoRecibir?.ToString("N2")</p>
+                    <p><small><strong>Tipo de Cambio Aplicado:</strong> 1 @Model.DatosOperacion.MonedaOrigen = @Model.DatosOperacion.TipoCambioAplicado?.ToString("N6") @Model.DatosOperacion.MonedaDestino</small></p>
+                </div>
+            </div>
+        }
+
+        <div class="boleta-footer" style="margin-top: 30px; text-align: center; font-size: 0.9em; color: #6c757d;">
+            <p>¡Gracias por utilizar nuestros servicios!</p>
+            <p>Este documento es un comprobante de la transacción realizada.</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 25px;">
+      
+        <a asp-controller="Casa" asp-action="Index" class="btn btn-primary">Realizar Nueva Operación</a>
+
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        No se pudo cargar la información de la boleta. Por favor, intente realizar la operación nuevamente.
+        <br />
+        <a asp-controller="Casa" asp-action="Index">Volver al inicio</a>
+    </div>
+}
